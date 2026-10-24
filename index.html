@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App | Created by Faizan Ahmad</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.85);
+            --text-color: #f8fafc;
+            --accent-color: #38bdf8;
+            --accent-hover: #0ea5e9;
+            --muted-text: #94a3b8;
+            --danger-color: #ef4444;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Running Background Orbs Animation */
+        .bg-animation {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .bg-animation span {
+            position: absolute;
+            display: block;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.2), rgba(14, 165, 233, 0.05));
+            animation: floatOrbs 16s infinite linear;
+            filter: blur(50px);
+        }
+
+        .bg-animation span:nth-child(1) {
+            width: 400px;
+            height: 400px;
+            top: -15%;
+            left: -10%;
+            animation-duration: 20s;
+        }
+
+        .bg-animation span:nth-child(2) {
+            width: 450px;
+            height: 450px;
+            bottom: -15%;
+            right: -10%;
+            animation-duration: 25s;
+            animation-direction: reverse;
+        }
+
+        @keyframes floatOrbs {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            50% { transform: translate(40px, 30px) rotate(180deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+
+        /* Weather App Container */
+        .weather-container {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            width: 100%;
+            max-width: 440px;
+            padding: 30px;
+            border-radius: 20px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+            z-index: 10;
+        }
+
+        .app-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .app-header h1 {
+            font-size: 1.7rem;
+            color: var(--accent-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .creator-badge {
+            display: inline-block;
+            background: rgba(56, 189, 248, 0.1);
+            color: var(--accent-color);
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-top: 6px;
+            border: 1px solid rgba(56, 189, 248, 0.3);
+        }
+
+        /* Search Box */
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px 16px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: var(--text-color);
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+        }
+
+        .search-box button {
+            background: var(--accent-color);
+            color: #0f172a;
+            border: none;
+            padding: 0 18px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .search-box button:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4);
+        }
+
+        /* Weather Display Card */
+        .weather-card {
+            text-align: center;
+            padding: 20px 0;
+            display: none; /* Shown dynamically via JS */
+        }
+
+        .weather-card.active {
+            display: block;
+        }
+
+        .city-name {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .weather-icon {
+            font-size: 4rem;
+            color: var(--accent-color);
+            margin: 15px 0;
+        }
+
+        .temperature {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            color: var(--muted-text);
+            text-transform: capitalize;
+            margin-bottom: 20px;
+        }
+
+        /* Weather Details Grid (Humidity & Wind) */
+        .weather-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #334155;
+        }
+
+        .detail-item {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px solid #334155;
+        }
+
+        .detail-item i {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+
+        .detail-item p {
+            font-size: 0.85rem;
+            color: var(--muted-text);
+        }
+
+        .detail-item h4 {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        /* Error Message Display */
+        .error-msg {
+            text-align: center;
+            color: var(--danger-color);
+            font-size: 0.95rem;
+            margin: 20px 0;
+            display: none;
+        }
+
+        /* Initial Instruction */
+        .initial-msg {
+            text-align: center;
+            color: var(--muted-text);
+            font-size: 0.95rem;
+            padding: 30px 0;
+        }
+
+        /* Direct Contact Bar */
+        .contact-bar {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(56, 189, 248, 0.1);
+        }
+
+        .contact-icon-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.9);
+            color: var(--text-color);
+            text-decoration: none;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: 1px solid #334155;
+            transition: all 0.3s ease;
+        }
+
+        .contact-icon-btn.whatsapp:hover {
+            background: #25d366;
+            color: #fff;
+            border-color: #25d366;
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.4);
+        }
+
+        .contact-icon-btn.gmail:hover {
+            background: #ea4335;
+            color: #fff;
+            border-color: #ea4335;
+            box-shadow: 0 4px 12px rgba(234, 67, 53, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Animated Background Orbs -->
+    <div class="bg-animation">
+        <span></span>
+        <span></span>
+    </div>
+
+    <div class="weather-container">
+        <!-- Header -->
+        <div class="app-header">
+            <h1><i class="fa-solid fa-cloud-sun"></i> Weather App</h1>
+            <div class="creator-badge"><i class="fa-solid fa-code"></i> Created by Faizan Ahmad</div>
+        </div>
+
+        <!-- Search Form -->
+        <form id="search-form" class="search-box">
+            <input type="text" id="city-input" placeholder="Enter city name..." autocomplete="off" required>
+            <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+        </form>
+
+        <!-- Initial Helper Message -->
+        <div id="initial-msg" class="initial-msg">
+            Search for any city to check live weather updates.
+        </div>
+
+        <!-- Error Message Container -->
+        <div id="error-msg" class="error-msg">
+            City not found. Please check the spelling and try again.
+        </div>
+
+        <!-- Weather Info Card -->
+        <div id="weather-card" class="weather-card">
+            <h2 id="city-name" class="city-name">Islamabad, PK</h2>
+            <div id="weather-icon" class="weather-icon">
+                <i class="fa-solid fa-sun"></i>
+            </div>
+            <div id="temperature" class="temperature">28°C</div>
+            <div id="description" class="description">Sunny & Clear</div>
+
+            <div class="weather-details">
+                <div class="detail-item">
+                    <i class="fa-solid fa-droplet"></i>
+                    <p>Humidity</p>
+                    <h4 id="humidity">45%</h4>
+                </div>
+                <div class="detail-item">
+                    <i class="fa-solid fa-wind"></i>
+                    <p>Wind Speed</p>
+                    <h4 id="wind-speed">3.6 m/s</h4>
+                </div>
+            </div>
+        </div>
+
+        <!-- Direct Contact Bar -->
+        <div class="contact-bar">
+            <a href="https://wa.me/923489573662" target="_blank" class="contact-icon-btn whatsapp" title="Chat on WhatsApp">
+                <i class="fa-brands fa-whatsapp" style="font-size: 1.1rem;"></i> WhatsApp
+            </a>
+            <a href="mailto:faizanaahmad091@gmail.com" class="contact-icon-btn gmail" title="Send Email">
+                <i class="fa-solid fa-envelope" style="font-size: 1.1rem;"></i> Gmail
+            </a>
+        </div>
+    </div>
+
+    <!-- JavaScript File Linking -->
+    <script src="app.js"></script>
+</body>
+</html>
