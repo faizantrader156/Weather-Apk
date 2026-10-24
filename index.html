@@ -83,16 +83,38 @@
         }
 
         /* Weather App Container */
+        /* Weather App Container */
         .weather-container {
             background: var(--card-bg);
             backdrop-filter: blur(15px);
-            width: 100%;
+            width: 90%;          /* Mobile ke liye width fix ki */
             max-width: 440px;
-            padding: 30px;
+            padding: 25px 20px;  /* Padding thodi adjust ki */
             border-radius: 20px;
             border: 1px solid rgba(56, 189, 248, 0.2);
             box-shadow: 0 15px 35px rgba(0,0,0,0.5);
             z-index: 10;
+        }
+
+        /* Search Box Responsive Fix */
+        .search-box {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .search-box input {
+            flex: 1;
+            min-width: 0; /* Input box ko overflow hone se bachata hai */
+            padding: 12px 14px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid #334155;
+            border-radius: 10px;
+            color: var(--text-color);
+            font-size: 0.9rem;
+            outline: none;
+            transition: border-color 0.3s ease;
         }
 
         .app-header {
